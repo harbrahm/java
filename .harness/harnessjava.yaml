@@ -31,5 +31,5 @@ pipeline:
                                 identifier: building_code
                                 spec:
                                     connectorRef: account.harnessImage
-                                    image: https://devjfrogy.jfrog.io/artifactory/default-docker-remote/maven:latest
+                                    image: devjfrogy.jfrog.io/default-docker-remote/maven:latest
                                     command: mvn clean package
