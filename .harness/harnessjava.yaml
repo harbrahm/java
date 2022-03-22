@@ -33,3 +33,12 @@ pipeline:
                                     connectorRef: jfrog
                                     image: devjfrogy.jfrog.io/default-docker-remote/maven:latest
                                     command: mvn clean package
+                          - step:
+                                type: BuildAndPushDockerRegistry
+                                name: create and push image
+                                identifier: create_and_push_image
+                                spec:
+                                    connectorRef: jfrog
+                                    repo: devjfrogy.jfrog.io/harnesslocalrepo/javabuildimage
+                                    tags:
+                                        - "1.0"
