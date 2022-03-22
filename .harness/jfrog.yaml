@@ -1,0 +1,17 @@
+connector:
+  name: jfrog
+  identifier: jfrog
+  description:
+  orgIdentifier: default
+  projectIdentifier: POCjavaproject
+  type: DockerRegistry
+  spec:
+    dockerRegistryUrl: https://devjfrogy.jfrog.io/
+    providerType: Other
+    auth:
+      type: UsernamePassword
+      spec:
+        username: kgagneet486@gmail.com
+        passwordRef: jfrogkgagneet486
+    delegateSelectors:
+    - harnessgk
