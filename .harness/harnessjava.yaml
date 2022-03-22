@@ -30,6 +30,6 @@ pipeline:
                                 name: building code
                                 identifier: building_code
                                 spec:
-                                    connectorRef: account.harnessImage
+                                    connectorRef: jfrog
                                     image: devjfrogy.jfrog.io/default-docker-remote/maven:latest
                                     command: mvn clean package
