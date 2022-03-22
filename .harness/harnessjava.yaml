@@ -1,0 +1,35 @@
+pipeline:
+    name: harnessjava
+    identifier: harnessjava
+    allowStageExecutions: false
+    projectIdentifier: POCjavaproject
+    orgIdentifier: default
+    tags: {}
+    properties:
+        ci:
+            codebase:
+                connectorRef: HarbrahmGithub
+                repoName: java
+                build: <+input>
+    stages:
+        - stage:
+              name: build
+              identifier: build
+              type: CI
+              spec:
+                  cloneCodebase: true
+                  infrastructure:
+                      type: KubernetesDirect
+                      spec:
+                          connectorRef: harnessgk
+                          namespace: harnessgk
+                  execution:
+                      steps:
+                          - step:
+                                type: Run
+                                name: building code
+                                identifier: building_code
+                                spec:
+                                    connectorRef: account.harnessImage
+                                    image: https://devjfrogy.jfrog.io/artifactory/default-docker-remote/maven:latest
+                                    command: mvn clean package
