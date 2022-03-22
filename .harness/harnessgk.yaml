@@ -1,0 +1,12 @@
+connector:
+  name: harnessgk
+  identifier: harnessgk
+  description:
+  orgIdentifier: default
+  projectIdentifier: POCjavaproject
+  type: K8sCluster
+  spec:
+    credential:
+      type: InheritFromDelegate
+    delegateSelectors:
+    - harnessgk
