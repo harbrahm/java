@@ -1,7 +1,7 @@
 pipeline:
     name: harnessjava
     identifier: harnessjava
-    allowStageExecutions: false
+    allowStageExecutions: true
     projectIdentifier: POCjavaproject
     orgIdentifier: default
     tags: {}
@@ -42,3 +42,128 @@ pipeline:
                                     repo: devjfrogy.jfrog.io/harnesslocalrepo/javabuildimage
                                     tags:
                                         - "1.0"
+              failureStrategies: []
+              when:
+                  pipelineStatus: Success
+        - stage:
+              name: approval
+              identifier: approval
+              description: ""
+              type: Approval
+              spec:
+                  execution:
+                      steps:
+                          - step:
+                                name: Approval
+                                identifier: approval
+                                type: HarnessApproval
+                                timeout: 1d
+                                spec:
+                                    approvalMessage: |-
+                                        Please review the following information
+                                        and approve the pipeline progression
+                                    includePipelineExecutionHistory: true
+                                    approvers:
+                                        minimumCount: 1
+                                        disallowPipelineExecutor: false
+                                        userGroups:
+                                            - account.dev_users
+                                    approverInputs: []
+                                when:
+                                    stageStatus: All
+                                failureStrategies: []
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: Abort
+        - stage:
+              name: Deploy
+              identifier: Deploy
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceRef: dev
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              variables: []
+                              manifests:
+                                  - manifest:
+                                        identifier: deployment
+                                        type: K8sManifest
+                                        spec:
+                                            store:
+                                                type: Github
+                                                spec:
+                                                    connectorRef: HarbrahmGithub
+                                                    gitFetchType: Branch
+                                                    paths:
+                                                        - deployment.yaml
+                                                    repoName: java
+                                                    branch: master
+                                            skipResourceVersioning: false
+                                  - manifest:
+                                        identifier: valuesyaml
+                                        type: Values
+                                        spec:
+                                            store:
+                                                type: Github
+                                                spec:
+                                                    connectorRef: HarbrahmGithub
+                                                    gitFetchType: Branch
+                                                    paths:
+                                                        - values.yaml
+                                                    repoName: java
+                                                    branch: master
+                              artifacts:
+                                  primary:
+                                      spec:
+                                          connectorRef: jfrog
+                                          imagePath: harnesslocalrepo/javabuildimage
+                                          tag: "1.0"
+                                      type: DockerRegistry
+                  infrastructure:
+                      environmentRef: dev
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: harnessgk
+                              namespace: harnessgk
+                              releaseName: release-<+INFRA_KEY>
+                      allowSimultaneousDeployments: false
+                  execution:
+                      steps:
+                          - step:
+                                name: Rollout Deployment
+                                identifier: rolloutDeployment
+                                type: K8sRollingDeploy
+                                timeout: 10m
+                                spec:
+                                    skipDryRun: true
+                                failureStrategies:
+                                    - onFailure:
+                                          errors:
+                                              - AllErrors
+                                          action:
+                                              type: Abort
+                      rollbackSteps:
+                          - step:
+                                name: Rollback Rollout Deployment
+                                identifier: rollbackRolloutDeployment
+                                type: K8sRollingRollback
+                                timeout: 10m
+                                spec: {}
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
+              variables: []
+              when:
+                  pipelineStatus: Success
